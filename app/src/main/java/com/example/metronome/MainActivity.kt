@@ -1,11 +1,13 @@
 package com.example.metronome
 
 import android.R.attr.valueFrom
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.transition.Slide
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -14,9 +16,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -58,6 +65,7 @@ class MainActivity : ComponentActivity() {
 fun MetronomeApp() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     var bpmCount by rememberSaveable { mutableFloatStateOf(0f)}
+    var start by rememberSaveable { mutableStateOf(false)}
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -90,6 +98,38 @@ fun MetronomeApp() {
                         valueRange = 50F..230F,
                         onValueChange = { bpmCount = it }
                     )
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Button(
+                            onClick = {bpmCount--},
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "up"
+                            )
+                        }
+                        Button(
+                            onClick = {bpmCount++},
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowUp,
+                                contentDescription = "down"
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Button(
+                            onClick = {start = !start},
+
+                            ) {
+                            Text("Start/Stop", modifier = Modifier)
+                        }
+
+                    }
                 }
             }
 
