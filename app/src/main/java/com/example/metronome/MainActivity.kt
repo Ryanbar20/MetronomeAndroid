@@ -2,8 +2,14 @@ package com.example.metronome
 
 import android.R.attr.valueFrom
 import android.graphics.drawable.Icon
+import android.media.AudioManager
+import android.media.SoundPool
+import android.media.ToneGenerator
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.transition.Slide
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -32,6 +38,7 @@ import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +52,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import com.example.metronome.ui.theme.MetronomeTheme
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 
 
 class MainActivity : ComponentActivity() {
@@ -58,14 +68,26 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 }
 
 @PreviewScreenSizes
 @Composable
 fun MetronomeApp() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-    var bpmCount by rememberSaveable { mutableFloatStateOf(0f)}
+    val toneGen = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
+
+    var bpmCount by rememberSaveable() { mutableFloatStateOf(50f)}
     var start by rememberSaveable { mutableStateOf(false)}
+    LaunchedEffect(start) {
+        if (!start) return@LaunchedEffect
+
+
+        while (start) {
+            beep(toneGen)
+            delay((60000L / bpmCount).toLong())
+        }
+    }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -100,21 +122,21 @@ fun MetronomeApp() {
                     )
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Button(
-                            onClick = {bpmCount--},
+                            onClick = {bpmCount--; Log.d("log","down")},
                             modifier = Modifier.weight(1f)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = "up"
+                                contentDescription = "down"
                             )
                         }
                         Button(
-                            onClick = {bpmCount++},
+                            onClick = {bpmCount++; Log.d("log","up")},
                             modifier = Modifier.weight(1f)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowUp,
-                                contentDescription = "down"
+                                contentDescription = "up"
                             )
                         }
                     }
@@ -123,7 +145,7 @@ fun MetronomeApp() {
                         contentAlignment = Alignment.Center
                     ) {
                         Button(
-                            onClick = {start = !start},
+                            onClick = {start = !start; Log.d("log", "start/stop") },
 
                             ) {
                             Text("Start/Stop", modifier = Modifier)
@@ -153,3 +175,11 @@ fun Greeting(name: String, destination: AppDestinations, modifier: Modifier = Mo
         modifier = modifier
     )
 }
+
+
+
+fun beep(toneGen: ToneGenerator) {
+    toneGen.stopTone()
+    toneGen.startTone(ToneGenerator.TONE_PROP_BEEP2, 100)
+}
+
